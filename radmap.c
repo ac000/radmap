@@ -31,7 +31,7 @@ static void goto_entity(ChamplainView *map, ClutterActor *actor)
 	champlain_view_center_on(CHAMPLAIN_VIEW(map), lat, lon);
 }
 
-static void update_coord_label(ClutterActor *map, double lat, double lon)
+static void update_coord_label(double lat, double lon)
 {
 	char label_text[40];
 
@@ -57,7 +57,7 @@ static gboolean map_click(ClutterActor *actor, ClutterButtonEvent *event,
 	printf("%s was clicked @ %f, %f \n", entity, lat, lon);
 
 	if (strcmp(entity, "Map") == 0)
-		update_coord_label(actor, lat, lon);
+		update_coord_label(lat, lon);
 	else
 		goto_entity(view, actor);
 
