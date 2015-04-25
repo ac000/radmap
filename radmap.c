@@ -20,22 +20,13 @@
 
 static ClutterActor *coord_label;
 
-static void goto_entity(ChamplainView *map, const char *entity)
+static void goto_entity(ChamplainView *map, ClutterActor *actor)
 {
-	char string[512];
-	char fentity[80];
 	double lat;
 	double lon;
-	FILE *fp;
 
-	fp = fopen("markers", "r");
-	while (fgets(string, 512, fp)) {
-		sscanf(string, "%79[^|]|%lf|%lf|^\n]", fentity, &lat, &lon);
-		if (strncmp(entity, fentity, 511) == 0)
-			break;
-	}
-	fclose(fp);
-
+	lat = champlain_location_get_latitude(CHAMPLAIN_LOCATION(actor));
+	lon = champlain_location_get_longitude(CHAMPLAIN_LOCATION(actor));
 	g_object_set(G_OBJECT(map), "zoom-level", 12, NULL);
 	champlain_view_center_on(CHAMPLAIN_VIEW(map), lat, lon);
 }
@@ -68,7 +59,7 @@ static gboolean map_click(ClutterActor *actor, ClutterButtonEvent *event,
 	if (strcmp(entity, "Map") == 0)
 		update_coord_label(actor, lat, lon);
 	else
-		goto_entity(view, entity);
+		goto_entity(view, actor);
 
 	return TRUE;
 }
