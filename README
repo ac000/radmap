@@ -12,7 +12,8 @@ format
 
 label is what will be shown on the map.
 latitude and longitude are the co-ordinates for the centre of the circle.
-radius is the radius of the circle in metres.
+radius is the radius of the circle. You can specify this in kilometres (km),
+miles (mi) or metres. e.g 40km or 25.3mi or 3500
 red, green & blue are the colour values to use, each takes a value between
 0..255
 alpha is the amount of opacity to apply, it takes a value between 0..255

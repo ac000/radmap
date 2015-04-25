@@ -20,6 +20,26 @@
 
 static ClutterActor *coord_label;
 
+/*
+ * Convert kilometres to metres
+ *
+ * No need to be super accurate, we can just truncate the result.
+ */
+static int km_to_m(double km)
+{
+	return km * 1000;
+}
+
+/*
+ * Convert miles to metres
+ *
+ * No need to be super accurate, we can just truncate the result.
+ */
+static int mi_to_m(double mi)
+{
+	return mi * 1609.344;
+}
+
 static void goto_entity(ChamplainView *map, ClutterActor *actor)
 {
 	double lat;
@@ -108,45 +128,51 @@ static ChamplainMarkerLayer *create_marker_layer(ChamplainView *view)
 	while (fgets(string, 512, fp)) {
 		ClutterActor *marker;
 		ClutterColor *poly_color;
-		char entity[80];
-		double lat;
-		double lon;
-		unsigned int radius;
 		unsigned int red;
 		unsigned int green;
 		unsigned int blue;
 		unsigned int alpha;
 		struct geo_info gi;
+		char **fields = NULL;
 
-		sscanf(string, "%79[^|]|%lf|%lf|%d|%d|%d|%d|%d[^\n]",
-				entity, &lat, &lon, &radius,
-				&red, &green, &blue, &alpha);
-		if (entity[0] == '#')
+		if (string[0] == '#')
 			continue;
-
-		if (entity[0] == '\n')
+		if (string[0] == '\n')
 			break;
 
-		printf("%s, lat %f, lon %f, radius %d\n",
-				entity, lat, lon, radius);
-		marker = champlain_label_new_with_text(entity, "Sans 10",
+		fields = g_strsplit(string, "|", 0);
+
+		gi.lat = strtod(fields[1], NULL);
+		gi.lon = strtod(fields[2], NULL);
+		if (strstr(fields[3], "km"))
+			gi.radius = km_to_m(atoi(fields[3]));
+		else if (strstr(fields[3], "mi"))
+			gi.radius = mi_to_m(atoi(fields[3]));
+		else
+			gi.radius = atoi(fields[3]);
+		red = atoi(fields[4]);
+		green = atoi(fields[5]);
+		blue = atoi(fields[6]);
+		alpha = atoi(fields[7]);
+
+		printf("%s, lat %f, lon %f, radius %u\n",
+				fields[0], gi.lat, gi.lon, gi.radius);
+		marker = champlain_label_new_with_text(fields[0], "Sans 10",
 				NULL, NULL);
 		champlain_location_set_location(CHAMPLAIN_LOCATION(marker),
-				lat, lon);
+				gi.lat, gi.lon);
 		clutter_actor_set_reactive(marker, TRUE);
-		clutter_actor_set_name(marker, entity);
+		clutter_actor_set_name(marker, fields[0]);
 		g_signal_connect(marker, "button-release-event",
 				G_CALLBACK(map_click), view);
 		champlain_marker_layer_add_marker(mlayer,
 			CHAMPLAIN_MARKER(marker));
 
-		if (radius == 0)
+		g_strfreev(fields);
+		if (gi.radius == 0)
 			continue;
 
 		poly_color = clutter_color_new(red, green, blue, alpha);
-		gi.lat = lat;
-		gi.lon = lon;
-		gi.radius = radius;
 		add_a_polygon(view, &gi, poly_color);
 		clutter_color_free(poly_color);
 	}
