@@ -1,0 +1,39 @@
+Overview
+========
+
+radmap is a simple mapping application using libchamplain. The main point of
+this application is to allow you to draw one or more circles of specifed
+radiuses around specified locations with a label.
+
+To do this, create a markers file with one or more entries with the following
+format
+
+    label|latitude|longitude|radius|red|green|blue|alpha
+
+label is what will be shown on the map.
+latitude and longitude are the co-ordinates for the centre of the circle.
+radius is the radius of the circle in metres.
+red, green & blue are the colour values to use, each takes a value between
+0..255
+alpha is the amount of opacity to apply, it takes a value between 0..255
+0 is fully transparant and 255 is fully opaque.
+
+You can click a label to have the map zoom in and centre on it.
+
+
+Requirements
+============
+
+glib2 and recent versions of libchamplain and clutter.
+
+
+Build
+=====
+
+    $ make
+
+
+License
+=======
+
+Licensed under the GNU General Public License V2. See COPYING
