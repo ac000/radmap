@@ -18,6 +18,9 @@
 
 #include "vincenty_direct.h"
 
+#define MAP_WIDTH	1050
+#define MAP_HEIGHT	 750
+
 static ClutterActor *coord_label;
 
 /*
@@ -193,11 +196,11 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 
 	stage = clutter_stage_new();
-	clutter_actor_set_size(stage, 1050, 750);
+	clutter_actor_set_size(stage, MAP_WIDTH, MAP_HEIGHT);
 
 	/* Create the map view */
 	map = champlain_view_new();
-	clutter_actor_set_size(map, 1050, 750);
+	clutter_actor_set_size(map, MAP_WIDTH, MAP_HEIGHT);
 	clutter_actor_add_child(stage, map);
 	clutter_actor_set_name(map, "Map");
 	clutter_actor_set_reactive(map, TRUE);
