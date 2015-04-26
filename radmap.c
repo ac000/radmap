@@ -144,6 +144,13 @@ static ChamplainMarkerLayer *create_marker_layer(ChamplainView *view)
 			break;
 
 		fields = g_strsplit(string, "|", 0);
+		if (!fields[7] || fields[8]) {
+			fprintf(stderr, "Skipping invalid entry (%s) due to "
+					"incorrect number of fields\n",
+					fields[0]);
+			g_strfreev(fields);
+			continue;
+		}
 
 		gi.lat = strtod(fields[1], NULL);
 		gi.lon = strtod(fields[2], NULL);
