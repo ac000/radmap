@@ -93,7 +93,7 @@ static void add_a_polygon(ChamplainView *map, struct geo_info *gi,
 	int i;
 	ChamplainPathLayer *polygon = champlain_path_layer_new();
 
-	for (i = 0; i <= 360; i += 10) {
+	for (i = 0; i < 360; i += 10) {
 		double lat;
 		double lon;
 		ChamplainCoordinate *coord;
