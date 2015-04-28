@@ -62,8 +62,8 @@ static void update_coord_label(double lat, double lon)
 	clutter_text_set_text(CLUTTER_TEXT(coord_label), label_text);
 }
 
-static gboolean map_click(ClutterActor *actor, ClutterButtonEvent *event,
-			  ChamplainView *view)
+static void map_click(ClutterActor *actor, ClutterEvent *event,
+		      ChamplainView *view)
 {
 	double lon;
 	double lat;
@@ -84,7 +84,26 @@ static gboolean map_click(ClutterActor *actor, ClutterButtonEvent *event,
 	else
 		goto_entity(view, actor);
 
-	return TRUE;
+}
+
+static void input_events_cb(ClutterActor *actor, ClutterEvent *event,
+			    ChamplainView *view)
+{
+	switch (event->type) {
+	case CLUTTER_KEY_PRESS: {
+		guint sym = clutter_event_get_key_symbol(event);
+
+		switch (sym) {
+		case CLUTTER_Escape:
+		case CLUTTER_q:
+			clutter_main_quit();
+			return;
+		}
+	}
+	case CLUTTER_BUTTON_PRESS:
+		map_click(actor, event, view);
+		break;
+	}
 }
 
 static void add_a_polygon(ChamplainView *map, struct geo_info *gi,
@@ -204,6 +223,7 @@ int main(int argc, char *argv[])
 
 	stage = clutter_stage_new();
 	clutter_actor_set_size(stage, MAP_WIDTH, MAP_HEIGHT);
+	g_signal_connect(stage, "destroy", G_CALLBACK(clutter_main_quit), NULL);
 
 	/* Create the map view */
 	map = champlain_view_new();
@@ -212,9 +232,7 @@ int main(int argc, char *argv[])
 	clutter_actor_set_name(map, "Map");
 	clutter_actor_set_reactive(map, TRUE);
 	champlain_view_set_kinetic_mode(CHAMPLAIN_VIEW(map), TRUE);
-	g_signal_connect(map, "button-press-event", G_CALLBACK(map_click),
-			map);
-	g_signal_connect(map, "destroy", G_CALLBACK(clutter_main_quit), NULL);
+	g_signal_connect(map, "event", G_CALLBACK(input_events_cb), map);
 
 	/* Create the markers and marker layer */
 	markers = create_marker_layer(CHAMPLAIN_VIEW(map));
