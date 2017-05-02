@@ -1,7 +1,7 @@
 /*
  * radmap.c - Simple mapping application using libchamplain
  *
- * Copyright (C) 2015	Andrew Clayton <andrew@digital-domain.net>
+ * Copyright (C) 2015, 2017	Andrew Clayton <andrew@digital-domain.net>
  *
  * Licensed under the GNU General Public License V2
  * See COPYING
@@ -94,8 +94,8 @@ static void input_events_cb(ClutterActor *actor, ClutterEvent *event,
 		guint sym = clutter_event_get_key_symbol(event);
 
 		switch (sym) {
-		case CLUTTER_Escape:
-		case CLUTTER_q:
+		case CLUTTER_KEY_Escape:
+		case CLUTTER_KEY_q:
 			clutter_main_quit();
 			return;
 		}
