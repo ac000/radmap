@@ -27,6 +27,8 @@ Requirements
 
 glib2 and recent versions of libchamplain and clutter.
 
+This is also requires libac which can be found here
+https://github.com/ac000/libac
 
 Build
 =====

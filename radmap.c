@@ -16,12 +16,17 @@
 #include <clutter/clutter.h>
 #include <champlain/champlain.h>
 
-#include "vincenty_direct.h"
+#include <libac.h>
 
 #define MAP_WIDTH	1050
 #define MAP_HEIGHT	 750
 
 static ClutterActor *coord_label;
+
+struct geo_info {
+	ac_geo_t geo;
+	unsigned int radius;
+};
 
 /*
  * Convert kilometres to metres
@@ -113,14 +118,14 @@ static void add_a_polygon(ChamplainView *map, struct geo_info *gi,
 	ChamplainPathLayer *polygon = champlain_path_layer_new();
 
 	for (i = 0; i < 360; i += 10) {
-		double lat;
-		double lon;
+		ac_geo_t dst;
 		ChamplainCoordinate *coord;
 
-		gi->bearing = i;
-		vincenty_direct(gi, &lat, &lon);
-		printf("lat = %f, lon = %f\n", lat, lon);
-		coord = champlain_coordinate_new_full(lat, lon);
+		gi->geo.ref = AC_GEO_EREF_WGS84;
+		gi->geo.bearing = i;
+		ac_geo_vincenty_direct(&gi->geo, &dst, gi->radius);
+		printf("lat = %f, lon = %f\n", dst.lat, dst.lon);
+		coord = champlain_coordinate_new_full(dst.lat, dst.lon);
 		champlain_path_layer_add_node(polygon,
 				CHAMPLAIN_LOCATION(coord));
 	}
@@ -171,8 +176,8 @@ static ChamplainMarkerLayer *create_marker_layer(ChamplainView *view)
 			continue;
 		}
 
-		gi.lat = strtod(fields[1], NULL);
-		gi.lon = strtod(fields[2], NULL);
+		gi.geo.lat = strtod(fields[1], NULL);
+		gi.geo.lon = strtod(fields[2], NULL);
 		if (strstr(fields[3], "km"))
 			gi.radius = km_to_m(atoi(fields[3]));
 		else if (strstr(fields[3], "mi"))
@@ -185,11 +190,11 @@ static ChamplainMarkerLayer *create_marker_layer(ChamplainView *view)
 		alpha = atoi(fields[7]);
 
 		printf("%s, lat %f, lon %f, radius %u\n",
-				fields[0], gi.lat, gi.lon, gi.radius);
+				fields[0], gi.geo.lat, gi.geo.lon, gi.radius);
 		marker = champlain_label_new_with_text(fields[0], "Sans 10",
 				NULL, NULL);
 		champlain_location_set_location(CHAMPLAIN_LOCATION(marker),
-				gi.lat, gi.lon);
+				gi.geo.lat, gi.geo.lon);
 		clutter_actor_set_reactive(marker, TRUE);
 		clutter_actor_set_name(marker, fields[0]);
 		g_signal_connect(marker, "button-release-event",
